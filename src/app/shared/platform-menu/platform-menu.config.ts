@@ -11,6 +11,7 @@ export const PLATFORM_MENU_CONFIG: MenuAppConfig = {
     { label: 'Profile', icon: 'users', route: '/profile', keywords: 'company products channels connect accounts' },
   ],
   secondaryItems: [
+    { label: 'See it in action', icon: 'play', route: '/videos', keywords: 'videos demo examples watch use cases' },
     { label: 'Help', icon: 'help', route: '/help' },
     { label: 'About', icon: 'info', route: '/about' },
   ],

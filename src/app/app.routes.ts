@@ -68,6 +68,13 @@ export const routes: Routes = [
     title: 'Social',
   },
   {
+    // Public "See it in action" videos (design_handoff_16ahead_social_video C1/C2).
+    path: 'videos',
+    data: { header: 'doorway' },
+    loadComponent: () => import( './maya-social/pages/videos.component' ).then( ( m ) => m.VideosComponent ),
+    title: 'See it in action · 16Ahead Social',
+  },
+  {
     path: 'help',
     data: { header: 'none', page: 'help' },
     loadComponent: () => import( './maya-social/pages/help.component' ).then( ( m ) => m.HelpPageComponent ),

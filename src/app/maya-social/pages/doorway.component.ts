@@ -65,6 +65,7 @@ import { MayaSocialState } from '../state';
             <button type="button" class="ms-btn ms-btn--54" (click)="signIn()">I have Social. Sign in</button>
           }
         </div>
+        <a class="ms-link" routerLink="/videos">See it in action: four one-minute videos →</a>
         @if (state.signedIn()) {
           <p class="note">You're signed in as {{ state.email() }}, but this account doesn't have Social yet. One subscription works here and in the app; cancel anytime.</p>
         }
@@ -91,7 +92,7 @@ import { MayaSocialState } from '../state';
       </aside>
     </main>
 
-    <app-site-footer><a routerLink="/help">Help</a><a routerLink="/about">About</a></app-site-footer>
+    <app-site-footer><a routerLink="/videos">Videos</a><a routerLink="/help">Help</a><a routerLink="/about">About</a></app-site-footer>
   `,
 } )
 export class DoorwayComponent {
