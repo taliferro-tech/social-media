@@ -75,6 +75,14 @@ export const routes: Routes = [
     title: 'See it in action · 16Ahead Social',
   },
   {
+    // Comparison page C1 (same handoff). Synthesia named in text only.
+    path: 'compare/synthesia',
+    data: { header: 'doorway' },
+    loadComponent: () => import( './maya-social/pages/compare-synthesia.component' ).then( ( m ) => m.CompareSynthesiaComponent ),
+    title: '16Ahead Social vs Synthesia: the video maker that also posts it',
+  },
+  { path: 'compare', redirectTo: 'compare/synthesia' },
+  {
     path: 'help',
     data: { header: 'none', page: 'help' },
     loadComponent: () => import( './maya-social/pages/help.component' ).then( ( m ) => m.HelpPageComponent ),

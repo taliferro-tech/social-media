@@ -2,7 +2,8 @@ import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
 
 export type IconName =
   | 'plus' | 'check' | 'alert' | 'pin' | 'lock' | 'sparkle' | 'chevron-left' | 'chevron-right'
-  | 'arrow-right' | 'moved' | 'sun' | 'moon' | 'x' | 'link' | 'refresh' | 'calendar' | 'bell' | 'mail' | 'arrow-up-right' | 'image' | 'upload';
+  | 'arrow-right' | 'moved' | 'sun' | 'moon' | 'x' | 'link' | 'refresh' | 'calendar' | 'bell' | 'mail' | 'arrow-up-right' | 'image' | 'upload'
+  | 'infinity' | 'eye' | 'video';
 
 /** Lucide-style stroke icons (design: stroke 2.5-3.5, round caps). */
 @Component( {
@@ -33,6 +34,9 @@ export type IconName =
         @case ('arrow-up-right') { <path d="M7 17 17 7M7 7h10v10" /> }
         @case ('image') { <rect x="3" y="3" width="18" height="18" rx="2" /><circle cx="9" cy="9" r="2" /><path d="m21 15-3.09-3.09a2 2 0 0 0-2.82 0L6 21" /> }
         @case ('upload') { <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><path d="m17 8-5-5-5 5M12 3v12" /> }
+        @case ('infinity') { <path d="M12 12c-2-2.67-4-4-6-4a4 4 0 1 0 0 8c2 0 4-1.33 6-4Zm0 0c2 2.67 4 4 6 4a4 4 0 0 0 0-8c-2 0-4 1.33-6 4Z" /> }
+        @case ('eye') { <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z" /><circle cx="12" cy="12" r="3" /> }
+        @case ('video') { <rect x="2" y="6" width="14" height="12" rx="2" /><path d="m22 8-6 4 6 4V8Z" /> }
         @case ('link') { <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" /><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" /> }
       }
     </svg>

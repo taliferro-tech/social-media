@@ -92,7 +92,7 @@ import { MayaSocialState } from '../state';
       </aside>
     </main>
 
-    <app-site-footer><a routerLink="/videos">Videos</a><a routerLink="/help">Help</a><a routerLink="/about">About</a></app-site-footer>
+    <app-site-footer><a routerLink="/videos">Videos</a><a routerLink="/compare/synthesia">Compare</a><a routerLink="/help">Help</a><a routerLink="/about">About</a></app-site-footer>
   `,
 } )
 export class DoorwayComponent {
