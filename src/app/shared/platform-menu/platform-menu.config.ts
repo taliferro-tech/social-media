@@ -12,7 +12,7 @@ export const PLATFORM_MENU_CONFIG: MenuAppConfig = {
   ],
   secondaryItems: [
     { label: 'See it in action', icon: 'play', route: '/videos', keywords: 'videos demo examples watch use cases' },
-    { label: 'Compare with Synthesia', icon: 'chart', route: '/compare/synthesia', keywords: 'compare synthesia vs alternative video' },
+    { label: 'Compare', icon: 'chart', route: '/compare/synthesia', keywords: 'compare synthesia vs alternative video' },
     { label: 'Help', icon: 'help', route: '/help' },
     { label: 'About', icon: 'info', route: '/about' },
   ],

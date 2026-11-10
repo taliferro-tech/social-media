@@ -29,7 +29,7 @@ import { ShowcaseComponent } from './showcase.component';
       <ms-showcase class="is-page" [asPage]="true" />
       <section class="cta">
         <button type="button" class="ms-btn ms-btn--primary ms-btn--54" (click)="showcase()?.getSocial()">Get Social</button>
-        <a class="ms-btn ms-btn--54" routerLink="/compare/synthesia">Compare with Synthesia</a>
+        <a class="ms-btn ms-btn--54" routerLink="/compare/synthesia">Compare</a>
         <a class="ms-btn ms-btn--ghost ms-btn--54" routerLink="/">What Social does</a>
       </section>
     </main>
