@@ -51,3 +51,9 @@ ui-debug.log
 
 # Firebase deploy cache (rewritten on every deploy)
 .firebase/
+
+# Videos are deployed via Firebase Hosting, not stored in git
+*.mp4
+*.mov
+*.webm
+*.m4v
