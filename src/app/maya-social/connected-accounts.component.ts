@@ -165,7 +165,7 @@ export class ConnectedAccountsComponent implements OnInit {
       let detail: string;
       if ( account.status === 'connected' ) {
         statusLabel = account.account ? `Connected as ${ account.account }` : 'Connected';
-        detail = planned ? `${ planned.role } · ${ posts } a week` : 'Not in your strategy right now.';
+        detail = planned ? `${ planned.role } · ${ posts } a week` : 'Not in your strategy yet. Regenerate the strategy and I’ll consider it.';
       } else if ( account.status === 'needs_reconnect' ) {
         statusLabel = account.account ? `Needs reconnecting · ${ account.account }` : 'Needs reconnecting';
         const when = account.signedOutAt ? ` on ${ monthDay( account.signedOutAt.slice( 0, 10 ) ) }` : '';
@@ -225,7 +225,7 @@ export class ConnectedAccountsComponent implements OnInit {
   connectBluesky (): void {
     if ( !this.blueskyReady() ) return;
     this.blueskyBusy.set( true );
-    this.api.connectBluesky( this.handle().trim(), this.appPassword().trim() ).subscribe( {
+    this.api.connectBluesky( this.handle().trim().replace( /^@+/, '' ), this.appPassword().trim() ).subscribe( {
       next: () => {
         void this.state.refresh().then( () => {
           this.blueskyBusy.set( false );
