@@ -96,7 +96,7 @@ import { MayaSocialState } from './state';
               </div>
             }
           } @else {
-            <div class="panel"><p>Edit the title or the post, and I’ll check it against your strategy as you type.</p></div>
+            <div class="panel"><p>Edit the title or the post, and I’ll check it against your strategy as you type. Or save to approve it as it is.</p></div>
           }
           }
           <div class="spacer"></div>
@@ -132,7 +132,9 @@ export class EditSheetComponent implements OnInit {
   readonly pillar = computed( () => pillarOf( this.state.strategy(), this.post.pillar ) );
   readonly slot = computed( () => slotLabel( this.post, this.state.today() ) );
   readonly channels = computed( () => channelList( this.post.channels, this.state.channelNames(), this.state.strategy()?.channels.length ?? 0 ) );
-  readonly canSave = computed( () => !!this.check()?.aligned && !this.checking() && !!this.body().trim() );
+  /** Text untouched (e.g. only the image was replaced): approve the draft as-is, no check needed. */
+  readonly unchanged = computed( () => this.title().trim() === this.post.title.trim() && this.body().trim() === this.post.body.trim() );
+  readonly canSave = computed( () => !!this.body().trim() && ( this.unchanged() || ( !!this.check()?.aligned && !this.checking() ) ) );
 
   ngOnInit (): void {
     this.title.set( this.post.title );
@@ -183,7 +185,10 @@ export class EditSheetComponent implements OnInit {
 
   save (): void {
     this.saving.set( true );
-    this.api.edit( this.post.id, { title: this.title().trim(), body: this.body().trim() } ).subscribe( {
+    const request = this.unchanged()
+      ? this.api.approve( this.post.id )
+      : this.api.edit( this.post.id, { title: this.title().trim(), body: this.body().trim() } );
+    request.subscribe( {
       next: ( post ) => {
         this.saving.set( false );
         this.saved.emit( post );
