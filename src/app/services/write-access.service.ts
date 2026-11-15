@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { Observable, combineLatest, of } from 'rxjs';
-import { catchError, debounceTime, map, shareReplay, switchMap, take } from 'rxjs/operators';
+import { catchError, filter, map, shareReplay, switchMap, take } from 'rxjs/operators';
 import { GetTheAppProductKey } from '@taliferro/ui/platform/get-the-app.model';
 import { AccountBillingService } from './account-billing.service';
 import { SocialAuthService } from './social-auth.service';
@@ -39,19 +39,24 @@ export class WriteAccessService {
 
   private writeAccess (): Observable<Record<string, boolean> | null> {
     if ( !this.cached$ ) {
+      // Wait for a real tenant id. Right after an in-page sign-in the
+      // tenant stream still replays the signed-out '' until the Firestore
+      // lookup lands; taking that first value skipped the request and
+      // showed the master tenant "needs a subscription" (2026-11-14).
       this.cached$ = combineLatest( [this.authService.getTenantId(), this.authService.getUser()] ).pipe(
-        debounceTime( 0 ),
+        filter( ( [tenantId, user] ) => !!tenantId && !!user?.uid ),
         take( 1 ),
-        switchMap( ( [tenantId, user] ) => {
-          if ( !tenantId || !user?.uid ) return of( null );
-          return this.accountBilling.getSummary( { tenantId, userId: user.uid, userEmail: user.email ?? '' } ).pipe(
-            map( ( res ) => res?.data?.writeAccess ?? null ),
-            catchError( () => of( null ) ),
-          );
-        } ),
+        switchMap( ( [tenantId, user] ) =>
+          this.accountBilling.getSummary( { tenantId, userId: user?.uid ?? '', userEmail: user?.email ?? '' } ) ),
+        map( ( res ) => res?.data?.writeAccess ?? null ),
         shareReplay( { bufferSize: 1, refCount: false } ),
       );
     }
-    return this.cached$;
+    // A failed check reads as "no access" this time but isn't cached, so
+    // the next page asks again instead of staying locked until a reload.
+    return this.cached$.pipe( catchError( () => {
+      this.cached$ = null;
+      return of( null );
+    } ) );
   }
 }
