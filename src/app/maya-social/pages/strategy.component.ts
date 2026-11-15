@@ -3,13 +3,19 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 
 import { NotificationService } from '../../services/notification.service';
-import { MayaSocialApi, Product, RequiredField, Strategy, apiError } from '../api';
+import { MayaSocialApi, Overview, Product, RequiredField, Strategy, apiError } from '../api';
 import { monthDay } from '../format';
 import { IconComponent } from '../icon.component';
 import { MayaSocialState } from '../state';
 import { FirstStrategyBannerComponent, LoadErrorComponent, NotSetUpComponent } from '../states.component';
 import { StrategyChannelsComponent } from '../strategy-channels.component';
 import { StrategyChangeComponent } from '../strategy-change.component';
+
+/** How often, and for how long, to check on a build whose request dropped. */
+const WATCH_EVERY_MS = 4000;
+const WATCH_FOR_MS = 6 * 60 * 1000;
+/** Allowance for the server's clock vs this device's when matching a build to this request. */
+const CLOCK_SLACK_MS = 2 * 60 * 1000;
 
 const FIELD_LABELS: Record<RequiredField, string> = {
   companyName: 'Company name',
@@ -347,33 +353,96 @@ export class StrategyComponent implements OnInit, OnDestroy {
     if ( this.route.snapshot.queryParamMap.get( 'regenerate' ) ) {
       void this.router.navigate( [], { queryParams: {}, replaceUrl: true } );
       this.generate();
+      return;
+    }
+    // Back on the page (or reloaded) while a build is still going: keep waiting for it.
+    const job = this.state.overview()?.strategyJob;
+    if ( job?.status === 'running' ) {
+      this.startBuilding();
+      this.watch( Date.parse( job.startedAt ) );
     }
   }
 
   ngOnDestroy (): void {
+    this.destroyed = true;
+    clearTimeout( this.watchTimer );
     this.state.headerOverride.set( null );
   }
 
-  generate (): void {
+  private destroyed = false;
+  private watchTimer?: ReturnType<typeof setTimeout>;
+
+  private startBuilding (): void {
     this.building.set( true );
     this.buildFailed.set( null );
     this.state.headerOverride.set( 'welcome' );
-    const done = () => {
-      this.building.set( false );
-      this.state.headerOverride.set( null );
+  }
+
+  private stopBuilding (): void {
+    this.building.set( false );
+    this.state.headerOverride.set( null );
+  }
+
+  /**
+   * A build takes about a minute, and a connection that long can drop while
+   * the server carries on. Check the overview's strategyJob until the build
+   * that started at or after `since` finishes, then show it or the failure.
+   */
+  private watch ( since: number, status: number | null = null ): void {
+    const deadline = Date.now() + WATCH_FOR_MS;
+    const check = (): void => {
+      if ( this.destroyed ) return;
+      void this.state.refresh().then( ( overview: Overview | null ) => {
+        if ( this.destroyed ) return;
+        const job = overview?.strategyJob;
+        const ours = !!job && Date.parse( job.startedAt ) >= since - CLOCK_SLACK_MS;
+        if ( ours && job!.status === 'done' ) {
+          this.stopBuilding();
+          return;
+        }
+        if ( ( ours && job!.status === 'failed' ) || Date.now() > deadline ) {
+          this.stopBuilding();
+          this.buildFailed.set( { status } );
+          return;
+        }
+        // Not started yet (still on its way), or running: look again shortly.
+        this.watchTimer = setTimeout( check, WATCH_EVERY_MS );
+      } ).catch( () => {
+        if ( this.destroyed ) return;
+        if ( Date.now() > deadline ) {
+          this.stopBuilding();
+          this.buildFailed.set( { status } );
+        } else this.watchTimer = setTimeout( check, WATCH_EVERY_MS );
+      } );
     };
+    this.watchTimer = setTimeout( check, WATCH_EVERY_MS );
+  }
+
+  generate (): void {
+    this.startBuilding();
+    clearTimeout( this.watchTimer );
+    const sentAt = Date.now();
     this.api.generateStrategy().subscribe( {
       next: () => {
-        void this.state.refresh().then( done );
+        void this.state.refresh().then( () => this.stopBuilding() );
       },
       error: ( response ) => {
-        done();
         const error = apiError( response );
         if ( error.error === 'profile_incomplete' ) {
+          this.stopBuilding();
           void this.state.refresh();
           return;
         }
-        this.buildFailed.set( { status: ( response as { status?: number } )?.status || null } );
+        // The server answered with a real failure: show it.
+        const status = ( response as { status?: number } )?.status || null;
+        if ( status && status < 500 ) {
+          this.stopBuilding();
+          this.buildFailed.set( { status } );
+          return;
+        }
+        // Dropped connection or gateway timeout: the build may well still be
+        // running (or done). Keep the building screen up and check on it.
+        this.watch( sentAt, status );
       },
     } );
   }

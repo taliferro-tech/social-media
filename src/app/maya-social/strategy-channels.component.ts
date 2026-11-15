@@ -63,7 +63,7 @@ import { ChannelConnect } from './states.component';
           @if (info?.status === 'needs_reconnect') {
             Signed out{{ signedOut(info?.signedOutAt) }}. {{ channel.perWeek }} {{ channel.perWeek === 1 ? 'post' : 'posts' }} a week are skipping {{ channel.name }}.
           } @else {
-            {{ channel.role }}@if (channel.key === 'instagram' && info?.status !== 'connected') { Needs a business account linked to a Facebook Page.}
+            {{ channel.role }}@if (channel.key === 'instagram' && info?.status !== 'connected') { Needs a professional Instagram account (Business or Creator).}
           }
         </span>
         <span class="per">{{ channel.perWeek }}/wk</span>

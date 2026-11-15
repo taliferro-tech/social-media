@@ -177,7 +177,7 @@ export class ConnectedAccountsComponent implements OnInit {
       } else if ( account.key === 'bluesky' ) {
         detail = 'Connect with your handle and an app password.';
       } else if ( account.key === 'instagram' ) {
-        detail = 'Needs a business account linked to a Facebook Page.';
+        detail = 'Needs a professional Instagram account (Business or Creator).';
       } else {
         detail = planned ? `${ planned.role } · ${ posts } a week once connected` : 'Connect it and I can post there.';
       }

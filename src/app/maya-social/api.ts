@@ -56,6 +56,8 @@ export interface Overview {
   pendingStrategy: Strategy | null;
   /** What a proposed change does (gaps 2g); null for a plain regenerate. */
   pendingChange: StrategyChange | null;
+  /** The latest strategy build, so a page whose request dropped can still find out how it went. */
+  strategyJob?: StrategyJob | null;
   plannedThrough: string | null;
   nextPlanDate: string | null;
   connectedChannels: string[];
@@ -67,6 +69,8 @@ export interface Overview {
   publishingPaused: boolean;
   channels: Record<string, string>;
 }
+
+export interface StrategyJob { status: 'running' | 'done' | 'failed'; startedAt: string; finishedAt: string | null; code: string | null; }
 
 /** Social settings (gaps 2m): Maya Social only, not the Taliferro profile. */
 export interface SocialSettings { autoApproveHours?: AutoApproveHours; notifyPush?: boolean; notifyEmail?: boolean; }
