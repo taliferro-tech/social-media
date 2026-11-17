@@ -4,7 +4,7 @@ import { NotificationService } from '../services/notification.service';
 import { Router } from '@angular/router';
 
 import { ChannelResult, MayaSocialApi, Post } from './api';
-import { STATUS_LABELS, addDays, channelList, clock, monthDay, pillarOf, relativeDayAt, slotLabel, wallClock, weekdayLong } from './format';
+import { statusLabelOf, isQueuedOnly, addDays, channelList, clock, monthDay, pillarOf, relativeDayAt, slotLabel, wallClock, weekdayLong } from './format';
 import { HelpPopComponent } from './help-pop.component';
 import { IconComponent } from './icon.component';
 import { ImageBlockComponent } from './image-block.component';
@@ -155,7 +155,7 @@ export class PostDrawerComponent {
   readonly pillar = computed( () => pillarOf( this.state.strategy(), this.post.pillar ) );
   readonly slot = computed( () => slotLabel( this.post, this.state.today() ) );
   readonly channels = computed( () => channelList( this.post.channels, this.state.channelNames(), this.state.strategy()?.channels.length ?? 0 ) );
-  readonly status = computed( () => STATUS_LABELS[this.post.status] );
+  readonly status = computed( () => statusLabelOf( this.post ) );
 
   /** The line above the actions (2j table). */
   readonly info = computed( () => {
@@ -186,7 +186,9 @@ export class PostDrawerComponent {
           : `Title only. I write the copy and image on ${ weekdayLong( writeOn ) }, ${ monthDay( writeOn ) }, three days ahead.`;
       }
       case 'posted':
-        return `Posted ${ this.slot().replace( /^Today/, 'today' ) }.`;
+        return isQueuedOnly( post )
+          ? `Queued ${ this.slot().replace( /^Today/, 'today' ) }. It shows as posted once the channel accepts it.`
+          : `Posted ${ this.slot().replace( /^Today/, 'today' ) }.`;
       case 'expired':
         return `Not approved by ${ this.slot().replace( /^.* at /, '' ) }. Didn’t post.`;
       case 'paused':
@@ -213,6 +215,7 @@ export class PostDrawerComponent {
       case 'posted': return row.postedAt ? clock( row.postedAt, this.state.timeZone() ) : 'Posted';
       case 'failed': return ['account_reauth_required', 'account_disconnected', 'stale_social_account_binding', 'missing_social_account'].includes( row.reason ?? '' ) ? 'Signed out' : ( row.error || 'Failed' );
       case 'skipped': return 'Skipped';
+      case 'queued': return 'Queued';
       default: return 'Sending…';
     }
   }

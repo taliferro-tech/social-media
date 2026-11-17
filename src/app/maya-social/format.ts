@@ -84,6 +84,21 @@ export const STATUS_LABELS: Record<PostStatus, string> = {
   paused: 'Paused',
 };
 
+/**
+ * The status a person should see. A calendar post turns "posted" when its slot
+ * comes and it's handed to the publisher; until a channel actually accepts it,
+ * it's "Queued" (Ty, 2026-11-16: 16 posts said Posted while publishing was off).
+ */
+export function isQueuedOnly ( post: Pick<Post, 'status' | 'channelResults'> ): boolean {
+  const rows = post.channelResults ?? [];
+  return post.status === 'posted' && rows.length > 0 && !rows.some( ( row ) => row.status === 'posted' ) &&
+    rows.some( ( row ) => row.status === 'queued' || row.status === 'retrying' );
+}
+
+export function statusLabelOf ( post: Pick<Post, 'status' | 'channelResults'> ): string {
+  return isQueuedOnly( post ) ? 'Queued' : STATUS_LABELS[post.status];
+}
+
 export function pillarOf ( strategy: Strategy | null | undefined, key: string ): Pillar {
   return strategy?.pillars.find( ( pillar ) => pillar.key === key )
     || { key, name: key, share: 0, description: '', maxOneIn: 0, tint: 'blue' };

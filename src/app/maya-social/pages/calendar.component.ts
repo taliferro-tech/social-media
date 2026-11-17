@@ -8,7 +8,7 @@ import { PostChannelsComponent } from '../post-channels.component';
 import { PostDrawerComponent } from '../post-drawer.component';
 import { ChannelWarningComponent, LoadErrorComponent, NoStrategyComponent, NotSetUpComponent, SkeletonComponent } from '../states.component';
 import {
-  STATUS_LABELS, addDays, channelList, dayOfMonth, daysBetween, monthDay, monthYear, pillarOf, plural, slotLabel,
+  statusLabelOf, isQueuedOnly, addDays, channelList, dayOfMonth, daysBetween, monthDay, monthYear, pillarOf, plural, slotLabel,
   wallClock, weekdayLong, weekdayShort,
 } from '../format';
 import { IconComponent } from '../icon.component';
@@ -411,7 +411,7 @@ export class CalendarComponent implements OnInit {
 
   pillar ( post: Post ) { return pillarOf( this.strategy(), post.pillar ); }
   channels ( post: Post ) { return channelList( post.channels, this.state.channelNames(), this.strategy()?.channels.length ?? 0 ); }
-  status ( post: Post ) { return STATUS_LABELS[post.status]; }
+  status ( post: Post ) { return statusLabelOf( post ); }
   slotLabel ( post: Post ) { return slotLabel( post, this.today() ); }
   shortLabel ( post: Post ) { return `${ this.slotLabel( post ) }: ${ post.title }, ${ this.status( post ) }`; }
   isActive ( post: Post ) { return ACTIVE.includes( post.status ); }
@@ -442,7 +442,7 @@ export class CalendarComponent implements OnInit {
 
   postedTo ( post: Post ): string {
     const names = ( post.channelResults ?? [] ).filter( ( row ) => row.status === 'posted' ).map( ( row ) => this.channelName( row.channel ) );
-    if ( !names.length ) return 'Nothing went out.';
+    if ( !names.length ) return isQueuedOnly( post ) ? 'Queued. It shows as posted once the channel accepts it.' : 'Nothing went out.';
     return `Posted to ${ names.length > 1 ? `${ names.slice( 0, -1 ).join( ', ' ) } and ${ names[names.length - 1] }` : names[0] }`;
   }
 

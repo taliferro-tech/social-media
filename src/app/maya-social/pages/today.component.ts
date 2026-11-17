@@ -5,7 +5,7 @@ import { NotificationService } from '../../services/notification.service';
 import { ChannelResult, MayaSocialApi, Post } from '../api';
 import { EditSheetComponent } from '../edit-sheet.component';
 import {
-  STATUS_LABELS, addDays, channelList, clock, dayOfMonth, localDateKey, longDate, monthDay, pillarOf, plural,
+  statusLabelOf, addDays, channelList, clock, dayOfMonth, localDateKey, longDate, monthDay, pillarOf, plural,
   relativeDayAt, slotLabel, wallClock, weekdayLong, weekdayShort,
 } from '../format';
 import { HelpPopComponent } from '../help-pop.component';
@@ -170,7 +170,7 @@ const PENDING = ['needs_review', 'on_hold'];
                       <div class="result">
                         @if (row.status === 'posted') { <ms-icon name="check" [size]="16" [stroke]="3" /> } @else { <span class="ms-spinner" aria-hidden="true"></span> }
                         <strong>{{ channelName(row.channel) }}</strong>
-                        <span>{{ row.status === 'posted' ? 'Posted ' + wallClockOf(post) : row.status === 'skipped' ? 'Skipped' : 'Retrying' }}</span>
+                        <span>{{ row.status === 'posted' ? 'Posted ' + wallClockOf(post) : row.status === 'skipped' ? 'Skipped' : row.status === 'queued' ? 'Queued' : 'Retrying' }}</span>
                         @if (row.url) { <a class="ms-btn ms-btn--bg ms-btn--36" [href]="row.url" target="_blank" rel="noopener">View</a> }
                       </div>
                     }
@@ -543,7 +543,7 @@ export class TodayComponent implements OnInit {
   pillar ( post: Post ) { return pillarOf( this.strategy(), post.pillar ); }
   channels ( post: Post ) { return channelList( post.channels, this.state.channelNames(), this.strategy()?.channels.length ?? 0 ); }
   slot ( post: Post ) { return slotLabel( post, this.today() ); }
-  statusLabel ( post: Post ) { return STATUS_LABELS[post.status]; }
+  statusLabel ( post: Post ) { return statusLabelOf( post ); }
   weekday ( date: string ) { return weekdayLong( date ); }
 
   autoWhen ( post: Post ): string {
