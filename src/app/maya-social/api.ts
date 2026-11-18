@@ -91,10 +91,22 @@ export interface StrategyChange {
 export interface PostImage { source: 'maya' | 'user' | 'none'; status: 'pending' | 'making' | 'ready' | 'failed'; url?: string; brief: string; fileName?: string; width?: number; height?: number; reason?: string; }
 
 /** One channel of a post that went out (gaps 2n). */
-export interface ChannelResult { channel: string; status: 'queued' | 'retrying' | 'posted' | 'failed' | 'skipped'; url?: string; postedAt?: string | null; reason?: string; error?: string; retries?: number; }
+export interface ChannelResult { channel: string; status: 'queued' | 'retrying' | 'posted' | 'failed' | 'skipped' | 'sending'; dripId?: string; audienceCount?: number; url?: string; postedAt?: string | null; reason?: string; error?: string; retries?: number; }
+
+/** The post's campaign email (backend mayaSocial/campaign.js), on days with the Email channel. */
+export interface CampaignEmail {
+  status: 'drafted' | 'waiting_for_plan' | 'failed';
+  reason?: string;
+  subject?: string;
+  html?: string;
+  product?: string;
+  audiences?: Array<{ key: string; name: string; count?: number | null }>;
+  reach?: number;
+}
 
 export interface Post {
   id: string;
+  email?: CampaignEmail;
   pillar: string;
   title: string;
   body: string;

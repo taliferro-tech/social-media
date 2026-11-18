@@ -36,6 +36,8 @@ import { MayaSocialState } from './state';
     .note { display: flex; align-items: flex-start; gap: 8px; font-size: 14px; font-weight: 700; color: var(--t-pink-fg); }
     .body { font-size: 15px; line-height: 1.6; color: var(--muted); white-space: pre-line; }
     .info { font-size: 14px; line-height: 1.5; color: var(--muted); }
+    .email { display: grid; gap: 6px; justify-items: start; padding: 12px 14px; border-radius: 14px; background: var(--surface); font-size: 14px; line-height: 1.5; }
+    .email .subject { color: var(--muted); }
     .info strong { color: var(--text); }
     .spacer { flex: 1; }
     .title-edit { display: grid; grid-template-columns: 1fr auto; gap: 8px; }
@@ -74,6 +76,14 @@ import { MayaSocialState } from './state';
       }
       @if (post.body) { <p class="body">{{ post.body }}</p> }
       @if (post.image && post.status !== 'planned') { <ms-image-block [post]="post" variant="block" (changed)="changed.emit($event)" /> }
+      @if (emailView(); as e) {
+        <div class="email">
+          <strong>Email</strong>
+          <span>{{ e.line }}</span>
+          @if (e.subject) { <span class="subject">Subject: “{{ e.subject }}”</span> }
+          @if (e.canPreview) { <button type="button" class="ms-btn ms-btn--36" (click)="previewEmail()">Preview email</button> }
+        </div>
+      }
       @if (post.status === 'planned') {
         <div class="title-edit">
           <label class="ms-sr-only" for="drawer-title">Title</label>
@@ -203,6 +213,26 @@ export class PostDrawerComponent {
     this.closed.emit();
   }
 
+  /** The campaign email on an Email day, worded once (no template method calls). */
+  readonly emailView = computed( () => {
+    if ( !( this.post.channels || [] ).includes( 'email' ) ) return null;
+    const email = this.post.email;
+    if ( !email ) return { line: 'The campaign email is written when this post is drafted.', subject: '', canPreview: false };
+    if ( email.status === 'waiting_for_plan' ) return { line: email.reason || 'Waiting for the marketing plan to be approved.', subject: '', canPreview: false };
+    if ( email.status === 'failed' ) return { line: `Couldn’t write the email yet: ${email.reason || 'it will try again'}.`, subject: '', canPreview: false };
+    const who = ( email.audiences || [] ).map( ( a ) => a.name ).join( ', ' );
+    const reach = email.reach ? `about ${email.reach.toLocaleString()} people` : '';
+    return { line: [`About ${email.product}`, who && `to ${who}`, reach].filter( Boolean ).join( ' · ' ), subject: email.subject || '', canPreview: !!email.html };
+  } );
+
+  previewEmail (): void {
+    const html = this.post.email?.html;
+    if ( !html ) return;
+    const url = URL.createObjectURL( new Blob( [html], { type: 'text/html' } ) );
+    window.open( url, '_blank', 'noopener' );
+    setTimeout( () => URL.revokeObjectURL( url ), 60_000 );
+  }
+
   readonly heldTwice = computed( () => this.post.status === 'on_hold' && ( this.post.holdCount ?? 0 ) >= 2 );
   private readonly router = inject( Router );
 
@@ -216,6 +246,7 @@ export class PostDrawerComponent {
       case 'failed': return ['account_reauth_required', 'account_disconnected', 'stale_social_account_binding', 'missing_social_account'].includes( row.reason ?? '' ) ? 'Signed out' : ( row.error || 'Failed' );
       case 'skipped': return 'Skipped';
       case 'queued': return 'Queued';
+      case 'sending': return row.audienceCount ? `Going to ${row.audienceCount.toLocaleString()} people today and tomorrow, 9 to 5 their time` : 'Sending…';
       default: return 'Sending…';
     }
   }
