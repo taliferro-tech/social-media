@@ -87,7 +87,11 @@ const ROWS: Row[] = [
     }
 
     /* 1. Hero */
-    .hero { display: grid; grid-template-columns: 1.15fr 1fr; gap: 48px; align-items: center; }
+    .hero {
+      display: grid; grid-template-columns: 1.15fr 1fr; gap: 48px; align-items: center;
+      box-sizing: border-box; width: 100%; max-width: 1200px; margin: 0 auto;
+    }
+    .hero > * { min-width: 0; }
     .hero-text { display: flex; flex-direction: column; align-items: flex-start; gap: 22px; }
     .vs {
       padding: 6px 12px; border-radius: 999px; background: var(--t-violet); color: var(--t-violet-fg);
@@ -96,13 +100,19 @@ const ROWS: Row[] = [
     h1 { font-size: 64px; font-weight: 700; letter-spacing: -0.045em; line-height: 1; text-wrap: balance; }
     .sub { max-width: 560px; font-size: 19px; line-height: 1.5; color: var(--muted); }
     .actions { display: flex; flex-wrap: wrap; gap: 10px; }
-    .formats { position: relative; aspect-ratio: 540 / 440; }
+    /*
+     * Units are % of the media column width W (container is W wide, 1.01W tall).
+     * 16:9 is full width (0.06W–0.6225W tall). 9:16 overhangs its right edge
+     * by up to 60px (--overhang) and ends at 0.64W. Below that, the 4:5 sits
+     * bottom-left and the chip sits in the free gap to its right, clear of every card.
+     */
+    .formats { --overhang: min(60px, 10%); position: relative; aspect-ratio: 100 / 101; }
     .formats img { position: absolute; display: block; height: auto; max-width: none; object-fit: cover; border-radius: 18px; box-shadow: 0 24px 60px rgba(15,17,21,.22); }
-    .f169 { left: 0; top: 4.5%; width: 64%; aspect-ratio: 16 / 9; }
-    .f916 { right: 4%; top: 0; width: 34%; aspect-ratio: 9 / 16; }
-    .f45 { left: 0; top: 52%; width: 30%; aspect-ratio: 4 / 5; }
+    .f169 { left: 0; top: 5.94%; width: 100%; aspect-ratio: 16 / 9; }
+    .f916 { right: calc(-1 * var(--overhang)); top: 0; width: 36%; aspect-ratio: 9 / 16; }
+    .f45 { left: 0; bottom: 0; width: 26%; aspect-ratio: 4 / 5; }
     .one-edit {
-      position: absolute; left: 34%; top: 72%; display: inline-flex; align-items: center; gap: 6px;
+      position: absolute; left: 31%; top: 70%; display: inline-flex; align-items: center; gap: 6px;
       height: 30px; padding: 0 12px; border-radius: 999px; background: var(--t-green); color: var(--t-green-fg);
       font-size: 13px; font-weight: 700; white-space: nowrap;
     }
@@ -156,7 +166,9 @@ const ROWS: Row[] = [
     }
     @media (max-width: 900px) {
       .page { padding: 24px 16px 48px; gap: 48px; }
-      .hero { grid-template-columns: 1fr; gap: 32px; }
+      .hero { gap: 32px; }
+      /* 16px gutters: no room to hang the 9:16 past the column. */
+      .formats { --overhang: 0px; }
       h1 { font-size: 42px; }
       .sub { font-size: 17px; }
       h2 { font-size: 28px; }
@@ -166,7 +178,12 @@ const ROWS: Row[] = [
       .th .kick { display: none; }
       .better { flex-direction: column; align-items: flex-start; padding: 24px; }
     }
+    @media (max-width: 720px) {
+      .hero { grid-template-columns: 1fr; }
+      .formats { max-width: 480px; }
+    }
     @media (max-width: 560px) {
+      h1 { font-size: 36px; }
       .wishes { grid-template-columns: 1fr; }
       .formats img { border-radius: 12px; }
       .one-edit { font-size: 12px; height: 26px; }
