@@ -6,6 +6,7 @@ import { MayaSocialApi, apiError } from './api';
 import { monthDay } from './format';
 import { IconComponent } from './icon.component';
 import { MayaSocialState } from './state';
+import { BrowseNoticeComponent } from '../shared/write-access/browse-notice.component';
 
 /**
  * Screen states shared by Today, Calendar and Strategy
@@ -180,28 +181,61 @@ export class FirstStrategyBannerComponent {
   }
 }
 
-/** 2p: after "Not now". Today, Calendar and Strategy show the same. */
+/** What each app page is for, shown in browse mode (signed out, or no Social). */
+const BROWSE_COPY: Record<BrowsePage, { title: string; body: string; what: string }> = {
+  today: { title: 'Today', what: 'Today', body: 'Today is where your Marketing Assistant shows what posts next, what is waiting for your review, and what already went out. Approve, hold or change a post right from here.' },
+  calendar: { title: 'Calendar', what: 'the Calendar', body: 'The Calendar shows every planned post for the next few weeks by day, week or month, with each post’s channel and status: waiting for review, approved, posted or held.' },
+  strategy: { title: 'Strategy', what: 'Strategy', body: 'Strategy is the plan your Marketing Assistant posts from: your goal, the topics she writes about, which channels she uses and how often. Nothing posts until you approve it.' },
+  profile: { title: 'Profile', what: 'Profile', body: 'Profile holds your company, products and voice, which your Marketing Assistant writes from, plus your connected social accounts and how long she waits before a post goes out on its own.' },
+};
+
+export type BrowsePage = 'today' | 'calendar' | 'strategy' | 'profile';
+
+/**
+ * 2p: after "Not now". Today, Calendar and Strategy show the same.
+ * Signed out, or signed in without Social, it's browse mode instead: what the
+ * page is for, plus the sign-in / subscribe note (the Network standard).
+ */
 @Component( {
   selector: 'ms-not-set-up',
   standalone: true,
-  imports: [RouterLink],
+  imports: [RouterLink, BrowseNoticeComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   styles: [`
     .col { display: flex; flex-direction: column; align-items: flex-start; gap: 18px; max-width: 880px; margin: 0 auto; padding: 56px 40px 72px; }
     h1 { font-size: 48px; font-weight: 700; letter-spacing: -0.03em; line-height: 1.05; }
     p { font-size: 18px; line-height: 1.6; color: var(--muted); }
+    app-browse-notice { align-self: stretch; }
     @media (max-width: 760px) { .col { padding: 24px 16px 120px; } h1 { font-size: 32px; } }
   `],
   template: `
     <main class="col">
-      <img class="ms-avatar ms-avatar--64 brand-mark--light"  alt="Marketing Assistant" src="assets/brand/products/svg/light/03-marketing-assistant.svg" /><img class="ms-avatar ms-avatar--64 brand-mark--dark"  alt="Marketing Assistant" src="assets/brand/products/svg/dark/03-marketing-assistant.svg" />
-      <h1>I’m not running your social media yet.</h1>
-      <p>Nothing is planned and nothing will post. Setup takes about two minutes: how I work, one setting, then your strategy.</p>
-      <a class="ms-btn ms-btn--primary ms-btn--56" routerLink="/welcome">Set up Social</a>
+      @if (browse(); as copy) {
+        <app-browse-notice [what]="copy.what" />
+        <img class="ms-avatar ms-avatar--64 brand-mark--light"  alt="Marketing Assistant" src="assets/brand/products/svg/light/03-marketing-assistant.svg" /><img class="ms-avatar ms-avatar--64 brand-mark--dark"  alt="Marketing Assistant" src="assets/brand/products/svg/dark/03-marketing-assistant.svg" />
+        <h1>{{ copy.title }}</h1>
+        <p>{{ copy.body }}</p>
+        <p>You’re in browse mode, so there’s nothing of yours here yet.</p>
+        <a class="ms-btn ms-btn--primary ms-btn--56" routerLink="/">See how Social works</a>
+      } @else {
+        <img class="ms-avatar ms-avatar--64 brand-mark--light"  alt="Marketing Assistant" src="assets/brand/products/svg/light/03-marketing-assistant.svg" /><img class="ms-avatar ms-avatar--64 brand-mark--dark"  alt="Marketing Assistant" src="assets/brand/products/svg/dark/03-marketing-assistant.svg" />
+        <h1>I’m not running your social media yet.</h1>
+        <p>Nothing is planned and nothing will post. Setup takes about two minutes: how I work, one setting, then your strategy.</p>
+        <a class="ms-btn ms-btn--primary ms-btn--56" routerLink="/welcome">Set up Social</a>
+      }
     </main>
   `,
 } )
-export class NotSetUpComponent {}
+export class NotSetUpComponent {
+  private readonly state = inject( MayaSocialState );
+  private readonly page = signal<BrowsePage>( 'today' );
+  @Input() set for ( page: BrowsePage ) { this.page.set( page ); }
+  /** Browse-mode copy, or null for a Social subscriber who hasn't set up. */
+  readonly browse = computed( () => {
+    const access = this.state.accessNow();
+    return access === 'signedOut' || access === 'noMaya' ? BROWSE_COPY[this.page()] : null;
+  } );
+}
 
 /** Calendar before there's a strategy: say why it's empty and where to go. */
 @Component( {

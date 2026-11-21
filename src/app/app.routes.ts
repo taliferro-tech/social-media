@@ -1,6 +1,6 @@
 import { Routes } from '@angular/router';
 
-import { appGuard, entryGuard, strategyGuard, welcomeGuard } from './maya-social/guards';
+import { browseGuard, entryGuard, strategyGuard, welcomeGuard } from './maya-social/guards';
 
 /**
  * Maya Social (design_handoff_maya_social and _entry). `header` in route
@@ -25,7 +25,7 @@ export const routes: Routes = [
   },
   {
     path: 'today',
-    canActivate: [appGuard],
+    canActivate: [browseGuard],
     data: { header: 'app', pageTitle: 'Today' },
     loadComponent: () => import( './maya-social/pages/today.component' ).then( ( m ) => m.TodayComponent ),
     title: 'Today · Social',
@@ -34,28 +34,28 @@ export const routes: Routes = [
     path: 'calendar',
     // No strategyGuard: without a strategy the Calendar says why it's empty
     // (the guard bounced to /strategy, which from Strategy looked like a dead link).
-    canActivate: [appGuard],
+    canActivate: [browseGuard],
     data: { header: 'app', pageTitle: 'Calendar' },
     loadComponent: () => import( './maya-social/pages/calendar.component' ).then( ( m ) => m.CalendarComponent ),
     title: 'Calendar · Social',
   },
   {
     path: 'strategy',
-    canActivate: [appGuard],
+    canActivate: [browseGuard],
     data: { header: 'app', pageTitle: 'Strategy' },
     loadComponent: () => import( './maya-social/pages/strategy.component' ).then( ( m ) => m.StrategyComponent ),
     title: 'Strategy · Social',
   },
   {
     path: 'profile',
-    canActivate: [appGuard],
+    canActivate: [browseGuard],
     data: { header: 'app', pageTitle: 'Profile' },
     loadComponent: () => import( './maya-social/pages/profile.component' ).then( ( m ) => m.ProfileComponent ),
     title: 'Profile · Social',
   },
   {
     path: 'new',
-    canActivate: [appGuard, strategyGuard],
+    canActivate: [browseGuard, strategyGuard],
     data: { header: 'app', pageTitle: 'New post' },
     loadComponent: () => import( './maya-social/pages/new-post.component' ).then( ( m ) => m.NewPostComponent ),
     title: 'New post · Social',

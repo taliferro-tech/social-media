@@ -116,7 +116,7 @@ const PENDING = ['needs_review', 'on_hold'];
   `],
   template: `
     @if (!state.overview()?.onboardedAt) {
-      <ms-not-set-up />
+      <ms-not-set-up for="today" />
     } @else if (loadError() !== undefined) {
       <ms-load-error [status]="loadError() ?? null" (retry)="retry()" />
     } @else if (loading()) {

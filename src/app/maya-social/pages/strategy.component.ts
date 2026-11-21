@@ -118,7 +118,7 @@ const FIELD_LABELS: Record<RequiredField, string> = {
   `],
   template: `
     @if (!state.overview()?.onboardedAt) {
-      <ms-not-set-up />
+      <ms-not-set-up for="strategy" />
     } @else if (buildFailed()) {
       <ms-load-error title="I couldn’t finish the strategy." body="Your profile is saved. Try again, and I’ll start over from it." [status]="buildFailed()!.status" (retry)="generate()" />
     } @else if (building()) {

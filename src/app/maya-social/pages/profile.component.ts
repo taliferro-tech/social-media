@@ -8,6 +8,7 @@ import { NotificationService } from '../../services/notification.service';
 import { AutoApproveHours, MayaSocialApi, Product } from '../api';
 import { ConnectedAccountsComponent } from '../connected-accounts.component';
 import { IconComponent } from '../icon.component';
+import { NotSetUpComponent } from '../states.component';
 import { MayaSocialState } from '../state';
 
 const TONES = ['Plain', 'Confident', 'Playful'];
@@ -23,7 +24,7 @@ const TONES = ['Plain', 'Confident', 'Playful'];
 @Component( {
   selector: 'ms-profile',
   standalone: true,
-  imports: [FormsModule, IconComponent, ConnectedAccountsComponent],
+  imports: [FormsModule, IconComponent, ConnectedAccountsComponent, NotSetUpComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   styles: [`
     .grid { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 48px; align-items: start; }
@@ -74,6 +75,9 @@ const TONES = ['Plain', 'Confident', 'Playful'];
     }
   `],
   template: `
+    @if (browsing) {
+      <ms-not-set-up for="profile" />
+    } @else {
     <main class="ms-page">
       <div class="grid">
         <div class="form">
@@ -183,6 +187,7 @@ const TONES = ['Plain', 'Confident', 'Playful'];
         </aside>
       </div>
     </main>
+    }
   `,
 } )
 export class ProfileComponent {
@@ -194,6 +199,8 @@ export class ProfileComponent {
   readonly toneOptions = TONES;
   readonly hourOptions: AutoApproveHours[] = [2, 4, 6];
 
+  /** Signed out, or no Social: browse mode instead of the form (the guard lets everyone in). */
+  readonly browsing = ['signedOut', 'noMaya'].includes( this.state.accessNow() );
   private readonly profile = this.state.overview()?.profile;
   readonly companyName = signal( this.profile?.companyName ?? '' );
   readonly companyGoal = signal( this.profile?.companyGoal ?? '' );

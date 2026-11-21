@@ -146,7 +146,7 @@ interface Day {
   `],
   template: `
     @if (!state.overview()?.onboardedAt) {
-      <ms-not-set-up />
+      <ms-not-set-up for="calendar" />
     } @else if (!strategy()) {
       <ms-no-strategy />
     } @else if (loadError() !== undefined) {

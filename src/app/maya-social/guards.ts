@@ -44,6 +44,18 @@ export const appGuard: CanActivateFn = () => {
   } ) );
 };
 
+/**
+ * Today, Calendar, Strategy and Profile: open to everyone. Signed out, or
+ * signed in without Social, the page shows browse mode (what it does, and
+ * how to sign in or subscribe) instead of bouncing to the doorway, which
+ * made their menu links look dead (the Network standard).
+ */
+export const browseGuard: CanActivateFn = () => {
+  const state = inject( MayaSocialState );
+  const router = inject( Router );
+  return state.access().pipe( map( ( access ) => ( access === 'firstRun' ? router.createUrlTree( ['/welcome'] ) : true ) ) );
+};
+
 /** Pages that need a strategy (New post): without one, Strategy shows 1h/1i. */
 export const strategyGuard: CanActivateFn = () => {
   const state = inject( MayaSocialState );
