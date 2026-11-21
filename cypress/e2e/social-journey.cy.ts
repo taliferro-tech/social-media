@@ -185,10 +185,11 @@ describe( 'Social journey - sign in to sign out', () => {
     let callsAtSignOut = 0;
     cy.then( () => { callsAtSignOut = api.calls.length; } );
     cy.visitWithFirebaseEmulators( '/calendar' );
-    cy.location( 'pathname', { timeout: 40000 } ).should( 'eq', '/' );
-    cy.contains( 'header button', 'Sign in' ).should( 'be.visible' );
+    cy.location( 'pathname', { timeout: 40000 } ).should( 'eq', '/calendar' );
+    cy.get( '[data-cy="browse-notice"]', { timeout: 40000 } ).should( 'contain.text', 'Sign in' );
     cy.visitWithFirebaseEmulators( '/strategy' );
-    cy.location( 'pathname', { timeout: 40000 } ).should( 'eq', '/' );
+    cy.location( 'pathname', { timeout: 40000 } ).should( 'eq', '/strategy' );
+    cy.get( '[data-cy="browse-notice"]', { timeout: 40000 } ).should( 'contain.text', 'Sign in' );
     cy.then( () => {
       expect( api.calls.length, 'no Social calls after signing out' ).to.equal( callsAtSignOut );
       expect( api.unhandled, 'calls the fake doesn’t handle' ).to.be.empty;
