@@ -4,6 +4,10 @@ set -euo pipefail
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 cd "${SCRIPT_DIR}"
 
+# Install the @taliferro/ui version the lockfile asks for, if it isn't already
+# (deploys never reinstall packages otherwise). No-op when it matches.
+./scripts/ensure-ui-package.sh
+
 # The Firestore emulator (used by `npm run e2e` below) needs a JRE. Homebrew's
 # openjdk isn't symlinked onto PATH by default, so pick it up here rather than
 # requiring that to be done manually on every machine that runs this script.
