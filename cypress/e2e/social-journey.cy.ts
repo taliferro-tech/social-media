@@ -39,8 +39,14 @@ describe( 'Social journey - sign in to sign out', () => {
     cy.intercept( 'GET', HUB_LOGIN, { statusCode: 200, body: '<html><body>Hub login</body></html>' } ).as( 'hubLogin' );
     cy.intercept( 'GET', `${ PROVIDER_LOGIN }/**`, { statusCode: 200, body: '<html><body>Provider sign-in</body></html>' } ).as( 'providerLogin' );
 
-    cy.log( 'Signed out: the app sends you to the doorway' );
+    cy.log( 'Signed out: app pages open in browse mode (what the page is for, how to sign in)' );
     cy.visitWithFirebaseEmulators( '/today' );
+    cy.location( 'pathname', { timeout: 40000 } ).should( 'eq', '/today' );
+    cy.get( '[data-cy="browse-notice"]', { timeout: 40000 } ).should( 'contain.text', 'Sign in' );
+    cy.contains( 'p', 'You’re in browse mode' );
+
+    cy.log( 'The doorway' );
+    cy.visitWithFirebaseEmulators( '/' );
     cy.location( 'pathname', { timeout: 40000 } ).should( 'eq', '/' );
     cy.contains( 'h1', 'Marketing Assistant runs your social media.' );
     cy.then( () => expect( api.calls, 'no Social calls while signed out' ).to.be.empty );
