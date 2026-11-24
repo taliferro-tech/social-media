@@ -136,7 +136,7 @@ const TABS = [
           <button type="button" class="ms-btn ah-pill ah-theme" (click)="flipTheme()" [attr.aria-label]="theme() === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'">
             <ms-icon [name]="theme() === 'dark' ? 'sun' : 'moon'" [stroke]="2.75" /><span>{{ theme() === 'dark' ? 'Light' : 'Dark' }}</span>
           </button>
-          <app-platform-menu [isAdmin]="isAdmin()" [isLoggedIn]="signedIn()" [userName]="userName()" [userEmail]="email()" (signOut)="signOut()" />
+          <app-platform-menu [isAdmin]="isAdmin()" [isLoggedIn]="signedIn()" [userName]="userName()" [userEmail]="email()" [userId]="userId()" (signOut)="signOut()" />
         </div>
       </header>
 
@@ -181,11 +181,13 @@ export class HeaderComponent {
   /** 2a: New post needs an approved strategy and a connected channel. */
   readonly canPost = computed( () => !!this.state.strategy() && !this.state.publishingPaused() );
   readonly userName = signal( '' );
+  readonly userId = signal( '' );
   readonly isAdmin = signal( false );
 
   constructor () {
     this.auth.getUser().subscribe( ( user ) => {
       this.userName.set( user?.displayName || '' );
+      this.userId.set( user?.uid || '' );
       this.isAdmin.set( user?.uid === environment.taliferroTenantId );
       this.state.signedIn.set( !!user );
       this.state.email.set( user?.email || '' );
